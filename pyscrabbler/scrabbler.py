@@ -2,6 +2,7 @@ import argparse
 import sys
 from string_algorithms.trie import Trie
 from collections import deque, Counter
+import re
 
 
 def build_trie(words):
@@ -61,7 +62,12 @@ def find_permutations(word, trie, use_all_letters=True, limit=None):
 
 
 def find_regex(regex, words, limit=None):
-    pass
+    pattern = re.compile(regex)
+    words = filter(lambda w: pattern.match(w), words)
+    for i, w in enumerate(words):
+        if limit is not None and i > limit:
+            break
+        print(w)
 
 
 def main(args):
@@ -73,6 +79,8 @@ def main(args):
         find_permutations(
             word, trie, use_all_letters=not args.allow_shorter, limit=args.limit
         )
+    elif args.regex:
+        find_regex(word, words, limit=args.limit)
     else:
         print(find_word(word, trie))
 
@@ -91,7 +99,10 @@ if __name__ == "__main__":
         "-p", "--permutations", action="store_true", help="Print all permutations"
     )
     parser.add_argument(
-        "--allow_shorter", action="store_true", help="Print all permutations"
+        "--allow_shorter", action="store_true", help="Don't require using all letters."
+    )
+    parser.add_argument(
+        "-r", "--regex", action="store_true", help="Print words matching regex."
     )
 
     main(parser.parse_args())
