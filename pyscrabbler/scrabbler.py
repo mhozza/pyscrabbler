@@ -46,7 +46,7 @@ def find_subtree(word, trie, limit=None):
     return words
 
 
-def find_permutations(word, trie, use_all_letters=True, limit=None):
+def find_permutations(word, trie, use_all_letters=True, wildchar=None, limit=None):
     root = trie.root
     letters = Counter(word)
     q = deque([(root, "", letters)])
@@ -54,15 +54,22 @@ def find_permutations(word, trie, use_all_letters=True, limit=None):
 
     while len(q):
         node, w, l = q.popleft()
-        for c, subnode in sorted(
-            filter(lambda item: l[item[0]] > 0, node.children.items())
-        ):
+
+        if wildchar is None or l[wildchar] == 0:
+            subnodes = sorted(
+                filter(lambda item: l[item[0]] > 0, node.children.items())
+            )
+        else:
+            subnodes = sorted(node.children.items())
+
+        for c, subnode in subnodes:
             if limit is not None and limit > 0:
                 new_w = w + c
                 if (not use_all_letters or len(new_w) == len(word)) and subnode.is_word:
                     words.append(new_w)
                     limit -= 1
-                q.append((subnode, new_w, l - Counter(c)))
+                new_l = l - Counter(c) if l[c] > 0 else l - Counter(wildchar)
+                q.append((subnode, new_w, new_l))
     return words
 
 
@@ -85,7 +92,8 @@ def answer(word, trie, words, args):
     elif args.permutations:
         _print_list(
             find_permutations(
-                word, trie, use_all_letters=not args.allow_shorter, limit=args.limit
+                word, trie, use_all_letters=not args.allow_shorter,
+                wildchar=args.wildchar, limit=args.limit
             )
         )
     elif args.regex:
@@ -119,6 +127,10 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--allow_shorter", action="store_true", help="Don't require using all letters."
+    )
+    parser.add_argument(
+        "--wildchar", action="store", const='?', nargs='?',
+        help="Set a wildchar for the permutation matching (default: '?')"
     )
     parser.add_argument(
         "-r", "--regex", action="store_true", help="Print words matching regex."
