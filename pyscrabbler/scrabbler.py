@@ -102,17 +102,7 @@ def answer(word, trie, words, args):
         print(find_word(word, trie))
 
 
-def main(args):
-    trie, words = initialize_dictionary(args.dictionary)
-
-    if args.word:
-        answer(args.word, trie, words, args)
-    else:
-        while(word := input(">>> ")):
-            answer(word, trie, words, args)
-
-
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Scrabbler")
     parser.add_argument("word", type=str, nargs='?', help="Input word")
     parser.add_argument("-d", "--dictionary", type=str, help="Dictironary to search.")
@@ -136,4 +126,16 @@ if __name__ == "__main__":
         "-r", "--regex", action="store_true", help="Print words matching regex."
     )
 
-    main(parser.parse_args())
+    args = parser.parse_args()
+
+    trie, words = initialize_dictionary(args.dictionary)
+
+    if args.word:
+        answer(args.word, trie, words, args)
+    else:
+        while(word := input(">>> ")):
+            answer(word, trie, words, args)
+
+
+if __name__ == "__main__":
+    main()
