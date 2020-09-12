@@ -79,9 +79,7 @@ def _print_list(words):
         print(word)
 
 
-def main(args):
-    trie, words = initialize_dictionary(args.dictionary)
-    word = args.word
+def answer(word, trie, words, args):
     if args.subtree:
         _print_list(find_subtree(word, trie, limit=args.limit))
     elif args.permutations:
@@ -96,9 +94,19 @@ def main(args):
         print(find_word(word, trie))
 
 
+def main(args):
+    trie, words = initialize_dictionary(args.dictionary)
+
+    if args.word:
+        answer(args.word, trie, words, args)
+    else:
+        while(word := input(">>> ")):
+            answer(word, trie, words, args)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Scrabbler")
-    parser.add_argument("word", type=str, help="Input word")
+    parser.add_argument("word", type=str, nargs='?', help="Input word")
     parser.add_argument("-d", "--dictionary", type=str, help="Dictironary to search.")
     parser.add_argument(
         "-l", "--limit", type=int, help="Limit the number of words printed"
