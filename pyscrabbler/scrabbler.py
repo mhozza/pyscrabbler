@@ -3,6 +3,7 @@ import sys
 from string_algorithms.trie import Trie
 from collections import deque, Counter
 import re
+from itertools import islice
 
 
 def build_trie(words):
@@ -27,26 +28,29 @@ def find_word(word, trie):
     return trie.find(word)
 
 
-def print_subtree(word, trie, limit=None):
+def find_subtree(word, trie, limit=None):
     root = trie.get_node(word)
     q = deque([(root, word)])
+    words = []
 
     while len(q):
         node, w = q.popleft()
         if node.is_word:
-            print(w)
+            words.append(w)
         for c, subnode in sorted(node.children.items()):
             if limit is not None and limit > 0:
                 if subnode.is_word:
-                    print(w)
+                    words.append(w)
                     limit -= 1
                 q.append((subnode, w + c))
+    return words
 
 
 def find_permutations(word, trie, use_all_letters=True, limit=None):
     root = trie.root
     letters = Counter(word)
     q = deque([(root, "", letters)])
+    words = []
 
     while len(q):
         node, w, l = q.popleft()
@@ -56,31 +60,38 @@ def find_permutations(word, trie, use_all_letters=True, limit=None):
             if limit is not None and limit > 0:
                 new_w = w + c
                 if (not use_all_letters or len(new_w) == len(word)) and subnode.is_word:
-                    print(new_w)
+                    words.append(new_w)
                     limit -= 1
                 q.append((subnode, new_w, l - Counter(c)))
+    return words
 
 
 def find_regex(regex, words, limit=None):
     pattern = re.compile(regex)
     words = filter(lambda w: pattern.match(w), words)
-    for i, w in enumerate(words):
-        if limit is not None and i > limit:
-            break
-        print(w)
+    if limit:
+        return list(islice(words, limit))
+    return list(words)
+
+
+def _print_list(words):
+    for word in words:
+        print(word)
 
 
 def main(args):
     trie, words = initialize_dictionary(args.dictionary)
     word = args.word
     if args.subtree:
-        print_subtree(word, trie, limit=args.limit)
+        _print_list(find_subtree(word, trie, limit=args.limit))
     elif args.permutations:
-        find_permutations(
-            word, trie, use_all_letters=not args.allow_shorter, limit=args.limit
+        _print_list(
+            find_permutations(
+                word, trie, use_all_letters=not args.allow_shorter, limit=args.limit
+            )
         )
     elif args.regex:
-        find_regex(word, words, limit=args.limit)
+        _print_list(find_regex(word, words, limit=args.limit))
     else:
         print(find_word(word, trie))
 
