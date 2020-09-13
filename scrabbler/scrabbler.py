@@ -23,11 +23,13 @@ def load_dictionary(dict_fname: str) -> List[str]:
 
 def find_permutations(
     word: str,
-    root: TrieNode,
+    trie: Trie,
+    prefix=None,
     use_all_letters: bool = True,
     wildchar: str = None,
     limit: int = None,
 ) -> List[str]:
+    root = trie.get_node(prefix) if prefix else trie.root
     letters = Counter(word)
     q = deque([(root, "", letters)])
     words = []
@@ -50,7 +52,7 @@ def find_permutations(
                         limit -= 1
                 new_l = l - Counter(c) if l[c] > 0 else l - Counter(wildchar)
                 q.append((subnode, new_w, new_l))
-    return words
+    return [f"{prefix}{w}" for w in words] if prefix else words
 
 
 def find_regex(regex: str, words: List[str], limit: int = None) -> List[str]:
@@ -73,7 +75,8 @@ def answer(word: str, trie: Trie, words: List[str], args):
         _print_list(
             find_permutations(
                 word,
-                trie.get_node(args.prefix) if args.prefix else trie.root,
+                trie,
+                prefix=args.prefix,
                 use_all_letters=not args.allow_shorter,
                 wildchar=args.wildchar,
                 limit=args.limit,
