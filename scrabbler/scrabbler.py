@@ -26,7 +26,7 @@ def find_permutations(
     trie: Trie,
     prefix=None,
     use_all_letters: bool = True,
-    wildchar: str = None,
+    wildcard: str = None,
     limit: int = None,
 ) -> List[str]:
     root = trie.get_node(prefix) if prefix else trie.root
@@ -37,7 +37,7 @@ def find_permutations(
     while len(q):
         node, w, l = q.popleft()
 
-        if wildchar is None or l[wildchar] == 0:
+        if wildcard is None or l[wildcard] == 0:
             subnodes = sorted(
                 filter(lambda item: l[item[0]] > 0, node.children.items())
             )
@@ -50,7 +50,7 @@ def find_permutations(
                     words.append(new_w)
                     if limit is not None:
                         limit -= 1
-                new_l = l - Counter(c) if l[c] > 0 else l - Counter(wildchar)
+                new_l = l - Counter(c) if l[c] > 0 else l - Counter(wildcard)
                 q.append((subnode, new_w, new_l))
     return [f"{prefix}{w}" for w in words] if prefix else words
 
@@ -78,7 +78,7 @@ def answer(word: str, trie: Trie, words: List[str], args):
                 trie,
                 prefix=args.prefix,
                 use_all_letters=not args.allow_shorter,
-                wildchar=args.wildchar,
+                wildcard=args.wildcard,
                 limit=args.limit,
             )
         )
@@ -102,11 +102,11 @@ def main():
         "--allow_shorter", action="store_true", help="Don't require using all letters."
     )
     parser.add_argument(
-        "--wildchar",
+        "--wildcard",
         action="store",
         const="?",
         nargs="?",
-        help="Set a wildchar for the permutation matching (default: '?')",
+        help="Set a wildcard for the permutation matching (default: '?')",
     )
     parser.add_argument(
         "-r", "--regex", action="store_true", help="Print words matching regex."
