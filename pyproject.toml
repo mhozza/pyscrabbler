@@ -14,10 +14,6 @@ pytest = "^5.2"
 [tool.poetry.scripts]
 scrabbler = 'scrabbler.scrabbler:main'
 
-[build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
-
 [tool.black]
 target-version = ['py38']
 exclude = '''
@@ -36,3 +32,8 @@ exclude = '''
   | node_modules
 )/
 '''
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
