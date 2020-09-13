@@ -22,11 +22,12 @@ def load_dictionary(dict_fname: str) -> List[str]:
 
 
 def find_permutations(
-        word: str,
-        root: TrieNode,
-        use_all_letters: bool = True,
-        wildchar: str = None,
-        limit: int = None) -> List[str]:
+    word: str,
+    root: TrieNode,
+    use_all_letters: bool = True,
+    wildchar: str = None,
+    limit: int = None,
+) -> List[str]:
     letters = Counter(word)
     q = deque([(root, "", letters)])
     words = []
@@ -71,30 +72,38 @@ def answer(word: str, trie: Trie, words: List[str], args):
     else:
         _print_list(
             find_permutations(
-                word, trie.get_node(args.prefix) if args.prefix else trie.root,
+                word,
+                trie.get_node(args.prefix) if args.prefix else trie.root,
                 use_all_letters=not args.allow_shorter,
-                wildchar=args.wildchar, limit=args.limit
+                wildchar=args.wildchar,
+                limit=args.limit,
             )
         )
 
 
 def main():
     parser = argparse.ArgumentParser(description="Scrabbler")
-    parser.add_argument("word", type=str, nargs='?', help="Input word")
-    parser.add_argument("-d", "--dictionary", type=str, help="Dictironary to search.")
+    parser.add_argument("word", type=str, nargs="?", help="Input word")
+    parser.add_argument(
+        "-d", "--dictionary", type=str, required=True, help="Dictironary to search."
+    )
     parser.add_argument(
         "-l", "--limit", type=int, help="Limit the number of words printed."
     )
     parser.add_argument(
-        "--prefix", type=str,
-        help="Only print words starting with the specified prefix."
+        "--prefix",
+        type=str,
+        help="Only print words starting with the specified prefix.",
     )
     parser.add_argument(
         "--allow_shorter", action="store_true", help="Don't require using all letters."
     )
     parser.add_argument(
-        "--wildchar", action="store", const='?', nargs='?',
-        help="Set a wildchar for the permutation matching (default: '?')"
+        "--wildchar",
+        action="store",
+        const="?",
+        nargs="?",
+        help="Set a wildchar for the permutation matching (default: '?')",
     )
     parser.add_argument(
         "-r", "--regex", action="store_true", help="Print words matching regex."
@@ -112,7 +121,7 @@ def main():
     if args.word:
         answer(args.word, trie, words, args)
     else:
-        while(word := input(">>> ")):
+        while word := input(">>> "):
             answer(word, trie, words, args)
 
 
