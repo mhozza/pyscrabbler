@@ -41,13 +41,13 @@ def find_permutations(
             )
         else:
             subnodes = sorted(node.children.items())
-
         for c, subnode in subnodes:
-            if limit is not None and limit > 0:
+            if limit is None or limit > 0:
                 new_w = w + c
                 if (not use_all_letters or len(new_w) == len(word)) and subnode.is_word:
                     words.append(new_w)
-                    limit -= 1
+                    if limit is not None:
+                        limit -= 1
                 new_l = l - Counter(c) if l[c] > 0 else l - Counter(wildchar)
                 q.append((subnode, new_w, new_l))
     return words
@@ -121,8 +121,11 @@ def main():
     if args.word:
         answer(args.word, trie, words, args)
     else:
-        while word := input(">>> "):
-            answer(word, trie, words, args)
+        try:
+            while word := input(">>> "):
+                answer(word, trie, words, args)
+        except EOFError:
+            pass
 
 
 if __name__ == "__main__":
