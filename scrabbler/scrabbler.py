@@ -1,12 +1,13 @@
 import argparse
 import sys
-from string_algorithms.trie import Trie
+from string_algorithms.trie import Trie, TrieNode
 from collections import deque, Counter
 import re
 from itertools import islice
+from typing import List
 
 
-def build_trie(words):
+def build_trie(words: List[str]) -> Trie:
     trie = Trie()
 
     for word in words:
@@ -15,39 +16,17 @@ def build_trie(words):
     return trie
 
 
-def initialize_dictionary(dict_fname):
-    print("Initializing dictionary...", file=sys.stderr)
+def load_dictionary(dict_fname: str) -> List[str]:
     with open(dict_fname) as f:
-        words = list(map(str.strip, f.readlines()))
-    trie = build_trie(words)
-    print("Done.", file=sys.stderr)
-    return trie, words
+        return list(map(str.strip, f.readlines()))
 
 
-def find_word(word, trie):
-    return trie.find(word)
-
-
-def find_subtree(word, trie, limit=None):
-    root = trie.get_node(word)
-    q = deque([(root, word)])
-    words = []
-
-    while len(q):
-        node, w = q.popleft()
-        if node.is_word:
-            words.append(w)
-        for c, subnode in sorted(node.children.items()):
-            if limit is not None and limit > 0:
-                if subnode.is_word:
-                    words.append(w)
-                    limit -= 1
-                q.append((subnode, w + c))
-    return words
-
-
-def find_permutations(word, trie, use_all_letters=True, wildchar=None, limit=None):
-    root = trie.root
+def find_permutations(
+        word: str,
+        root: TrieNode,
+        use_all_letters: bool = True,
+        wildchar: str = None,
+        limit: int = None) -> List[str]:
     letters = Counter(word)
     q = deque([(root, "", letters)])
     words = []
@@ -73,7 +52,7 @@ def find_permutations(word, trie, use_all_letters=True, wildchar=None, limit=Non
     return words
 
 
-def find_regex(regex, words, limit=None):
+def find_regex(regex: str, words: List[str], limit: int = None) -> List[str]:
     pattern = re.compile(regex)
     words = filter(lambda w: pattern.match(w), words)
     if limit:
@@ -81,25 +60,22 @@ def find_regex(regex, words, limit=None):
     return list(words)
 
 
-def _print_list(words):
+def _print_list(words: List[str]):
     for word in words:
         print(word)
 
 
-def answer(word, trie, words, args):
-    if args.subtree:
-        _print_list(find_subtree(word, trie, limit=args.limit))
-    elif args.permutations:
+def answer(word: str, trie: Trie, words: List[str], args):
+    if args.regex:
+        _print_list(find_regex(word, words, limit=args.limit))
+    else:
         _print_list(
             find_permutations(
-                word, trie, use_all_letters=not args.allow_shorter,
+                word, trie.get_node(args.prefix) if args.prefix else trie.root,
+                use_all_letters=not args.allow_shorter,
                 wildchar=args.wildchar, limit=args.limit
             )
         )
-    elif args.regex:
-        _print_list(find_regex(word, words, limit=args.limit))
-    else:
-        print(find_word(word, trie))
 
 
 def main():
@@ -107,13 +83,11 @@ def main():
     parser.add_argument("word", type=str, nargs='?', help="Input word")
     parser.add_argument("-d", "--dictionary", type=str, help="Dictironary to search.")
     parser.add_argument(
-        "-l", "--limit", type=int, help="Limit the number of words printed"
+        "-l", "--limit", type=int, help="Limit the number of words printed."
     )
     parser.add_argument(
-        "--subtree", action="store_true", help="Print all words starting by [word]"
-    )
-    parser.add_argument(
-        "-p", "--permutations", action="store_true", help="Print all permutations"
+        "--prefix", type=str,
+        help="Only print words starting with the specified prefix."
     )
     parser.add_argument(
         "--allow_shorter", action="store_true", help="Don't require using all letters."
@@ -128,7 +102,12 @@ def main():
 
     args = parser.parse_args()
 
-    trie, words = initialize_dictionary(args.dictionary)
+    print("Loading dictionary...", file=sys.stderr)
+    words = load_dictionary(args.dictionary)
+    if not args.regex:
+        print("Building trie...", file=sys.stderr)
+        trie = build_trie(words)
+    print("Done.", file=sys.stderr)
 
     if args.word:
         answer(args.word, trie, words, args)
