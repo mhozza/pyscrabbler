@@ -18,7 +18,7 @@ def build_trie(words: List[str]) -> Trie:
 
 def load_dictionary(dict_fname: str) -> List[str]:
     with open(dict_fname) as f:
-        return list(map(lambda word: word.strip.lower(), f.readlines()))
+        return list(map(lambda word: word.strip().lower(), f.readlines()))
 
 
 def find_permutations(
