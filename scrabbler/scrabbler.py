@@ -18,7 +18,7 @@ def build_trie(words: List[str]) -> Trie:
 
 def load_dictionary(dict_fname: str) -> List[str]:
     with open(dict_fname) as f:
-        return list(map(str.strip, f.readlines()))
+        return list(map(lambda word: word.strip.lower(), f.readlines()))
 
 
 def find_permutations(
@@ -69,6 +69,7 @@ def _print_list(words: List[str]):
 
 
 def answer(word: str, trie: Trie, words: List[str], args):
+    word = word.lower()
     if args.regex:
         _print_list(find_regex(word, words, limit=args.limit))
     else:
