@@ -153,6 +153,7 @@ def main():
 
     if args.word:
         if not args.regex:
+            print("Filtering dictionary...", file=sys.stderr)
             words = filter_dictionary(
                 words,
                 args.word,
@@ -160,7 +161,6 @@ def main():
                 wildcard=args.wildcard,
                 use_all_letters=not args.allow_shorter,
             )
-            print("Filtering dictionary...", file=sys.stderr)
             trie = None
             if args.allow_shorter or args.wildcard:
                 print("Building trie...", file=sys.stderr)
