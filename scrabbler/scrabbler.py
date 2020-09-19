@@ -1,6 +1,6 @@
 import argparse
 import sys
-from string_algorithms.trie import Trie, TrieNode
+from string_algorithms.trie import Trie
 from collections import deque, Counter
 import re
 from itertools import islice
@@ -19,6 +19,34 @@ def build_trie(words: List[str]) -> Trie:
 def load_dictionary(dict_fname: str) -> List[str]:
     with open(dict_fname) as f:
         return list(map(lambda word: word.strip().lower(), f.readlines()))
+
+
+def filter_dictionary(
+    words: List[str], letters: str, wildcard=None, use_all_letters=True, prefix=None
+) -> List[str]:
+    letters = sorted(letters)
+    letter_set = set(letters)
+    num_wildcards = 0 if wildcard is None else letters.count(wildcard)
+
+    def is_valid_word_without_prefix(word):
+        if len(word) > len(letters):
+            return False
+        if use_all_letters and len(word) != len(letters):
+            return False
+        if len(set(word) - letter_set) > num_wildcards:
+            return False
+        if not wildcard and use_all_letters and sorted(word) != letters:
+            return False
+        return True
+
+    def is_valid_word(word):
+        if prefix:
+            if not word.startswith(prefix):
+                return False
+            word = word[len(prefix) :]
+        return is_valid_word_without_prefix(word)
+
+    return list(filter(is_valid_word, words))
 
 
 def find_permutations(
@@ -68,13 +96,18 @@ def _print_list(words: List[str]):
         print(word)
 
 
-def answer(word: str, trie: Trie, words: List[str], args):
+def answer(word: str, trie: Trie, words: List[str], args, is_filtered=False):
     word = word.lower()
     if args.regex:
-        _print_list(find_regex(word, words, limit=args.limit))
+        result = find_regex(word, words, limit=args.limit)
     else:
-        _print_list(
-            find_permutations(
+        if is_filtered and not args.allow_shorter and not args.wildcard:
+            if not args.limit:
+                result = words
+            else:
+                result = words[: args.limit]
+        else:
+            result = find_permutations(
                 word,
                 trie,
                 prefix=args.prefix,
@@ -82,7 +115,7 @@ def answer(word: str, trie: Trie, words: List[str], args):
                 wildcard=args.wildcard,
                 limit=args.limit,
             )
-        )
+    _print_list(result)
 
 
 def main():
@@ -117,14 +150,27 @@ def main():
 
     print("Loading dictionary...", file=sys.stderr)
     words = load_dictionary(args.dictionary)
-    if not args.regex:
-        print("Building trie...", file=sys.stderr)
-        trie = build_trie(words)
-    print("Done.", file=sys.stderr)
 
     if args.word:
-        answer(args.word, trie, words, args)
+        if not args.regex:
+            words = filter_dictionary(
+                words,
+                args.word,
+                prefix=args.prefix,
+                wildcard=args.wildcard,
+                use_all_letters=not args.allow_shorter,
+            )
+            print("Filtering dictionary...", file=sys.stderr)
+            trie = None
+            if args.allow_shorter or args.wildcard:
+                print("Building trie...", file=sys.stderr)
+                trie = build_trie(words)
+        print("Done.", file=sys.stderr)
+        answer(args.word, trie, words, args, is_filtered=True)
     else:
+        print("Building trie...", file=sys.stderr)
+        trie = build_trie(words)
+        print("Done.", file=sys.stderr)
         try:
             while word := input(">>> "):
                 answer(word, trie, words, args)
