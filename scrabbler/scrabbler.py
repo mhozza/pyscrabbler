@@ -122,7 +122,11 @@ def main():
     parser = argparse.ArgumentParser(description="Scrabbler")
     parser.add_argument("word", type=str, nargs="?", help="Input word")
     parser.add_argument(
-        "-d", "--dictionary", type=str, required=True, help="Dictironary to search."
+        "-d",
+        "--dictionary",
+        type=str,
+        required=True,
+        help="List of words to search in.",
     )
     parser.add_argument(
         "-l", "--limit", type=int, help="Limit the number of words printed."

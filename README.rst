@@ -10,7 +10,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -d DICTIONARY, --dictionary DICTIONARY
-                        Dictironary to search.
+                        List of words to search in.
   -l LIMIT, --limit LIMIT
                         Limit the number of words printed.
   --prefix PREFIX       Only print words starting with the specified prefix.
