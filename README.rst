@@ -1,3 +1,6 @@
+# This project is now apandoned in favour of the faster version rewritten in Kotlin, see: https://github.com/mhozza/ScrabblerKt.
+
+
 Scrabbler written in python.
 
 Install: ``pip install scrabbler``
