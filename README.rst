@@ -1,5 +1,5 @@
-# This project is now apandoned in favour of the faster version rewritten in Kotlin, see: https://github.com/mhozza/ScrabblerKt.
-
+This project is now apandoned in favour of the faster version rewritten in Kotlin, see: `mhozza/ScrabblerKt <https://github.com/mhozza/ScrabblerKt>`_.
+==============================================
 
 Scrabbler written in python.
 
